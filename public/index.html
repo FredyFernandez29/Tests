@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FSATDesk - Sistema de Tickets</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex,nofollow">
+<style>
+/* ========== TODO EL CSS ORIGINAL (exactamente igual) ========== */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Space+Mono:wght@400;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --brand:#1a56db;--brand-light:#e8f0fe;--brand-dark:#1240a8;
+  --surface:#fff;--surface2:#f3f4f6;--surface3:#e9edf2;
+  --border:rgba(0,0,0,0.1);--text:#111827;--muted:#6b7280;
+  --radius:12px;--font:'DM Sans',sans-serif;--mono:'Space Mono',monospace;
+  --success:#1d9e75;--success-bg:#e1f5ee;--warn:#ba7517;--warn-bg:#faeeda;
+  --danger:#a32d2d;--danger-bg:#fcebeb;--info:#185fa5;--info-bg:#e6f1fb;
+  --admin:#7c3aed;--admin-bg:#f3f0ff;
+}
+body{font-family:var(--font);color:var(--text);background:#f1f5f9;min-height:100vh}
+#app{max-width:1100px;margin:0 auto;background:#fff;min-height:100vh;box-shadow:0 0 60px rgba(0,0,0,0.1)}
+.screen{display:none}.screen.active{display:block}
+nav{display:flex;align-items:center;justify-content:space-between;padding:12px 28px;border-bottom:1px solid var(--border);background:#fff;position:sticky;top:0;z-index:100}
+.nav-brand{display:flex;align-items:center;gap:10px}
+.nav-logo-box{display:flex;align-items:center}
+.nav-logo-img{height:38px;width:auto;object-fit:contain}
+.nav-title{font-family:var(--mono);font-size:15px;font-weight:700;letter-spacing:-0.5px}
+.nav-title span{color:var(--brand)}
+.nav-right{display:flex;align-items:center;gap:8px}
+.nav-user{font-size:12px;color:var(--muted);padding:4px 10px;background:var(--surface2);border-radius:20px}
+.refresh-indicator{display:none;align-items:center;gap:6px;font-size:11px;color:var(--muted);padding:4px 10px;background:var(--surface2);border-radius:20px;user-select:none}
+.refresh-indicator.visible{display:flex}
+.refresh-ring{width:16px;height:16px;flex-shrink:0;position:relative}
+.refresh-ring svg{width:16px;height:16px;transform:rotate(-90deg)}
+.refresh-ring circle{fill:none;stroke:var(--surface3);stroke-width:2.5}
+.refresh-ring circle.arc{stroke:var(--brand);stroke-dasharray:40;stroke-dashoffset:0;transition:stroke-dashoffset 1s linear;stroke-linecap:round}
+.refresh-ring circle.arc.urgent{stroke:var(--warn)}
+.refresh-ring circle.arc.now{stroke:var(--success)}
+.nav-role{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600}
+.nav-role.admin{background:var(--admin-bg);color:var(--admin)}
+.nav-role.tecnico{background:var(--info-bg);color:var(--info)}
+.nav-role.usuario{background:var(--success-bg);color:var(--success)}
+.btn-nav{font-size:12px;padding:7px 16px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;color:var(--text);font-family:var(--font);transition:all .15s}
+.btn-nav:hover{background:var(--surface2)}
+.btn-primary{background:var(--brand)!important;color:white!important;border-color:var(--brand)!important;font-weight:500}
+.btn-primary:hover{background:var(--brand-dark)!important}
+.btn-danger{background:var(--danger)!important;color:white!important;border-color:var(--danger)!important}
+.btn-success{background:var(--success)!important;color:white!important;border-color:var(--success)!important}
+.app-layout{display:grid;grid-template-columns:200px 1fr;min-height:calc(100vh - 57px)}
+.sidebar{background:#f8fafc;border-right:1px solid var(--border);padding:0}
+.sidebar-logo{padding:14px 16px 18px;border-bottom:1px solid var(--border);margin-bottom:14px;text-align:center}
+.sidebar-logo img{height:52px;width:auto;object-fit:contain}
+.sidebar-sections{padding-top:4px}
+.sidebar-section{padding:0 12px;margin-bottom:20px}
+.sidebar-label{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;padding:0 8px;margin-bottom:8px}
+.sidebar-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--muted);transition:all .15s;margin-bottom:2px}
+.sidebar-item:hover{background:var(--surface3);color:var(--text)}
+.sidebar-item.active{background:var(--brand-light);color:var(--brand);font-weight:500}
+.sidebar-item svg{width:16px;height:16px;flex-shrink:0}
+.main-content{padding:28px;overflow-y:auto}
+.tabs{display:flex;gap:4px;margin-bottom:24px;border-bottom:1px solid var(--border);padding-bottom:0}
+.tab{font-size:13px;padding:8px 18px;cursor:pointer;border-radius:6px 6px 0 0;color:var(--muted);border:1px solid transparent;border-bottom:none;background:none;font-family:var(--font);transition:all .15s}
+.tab:hover{color:var(--text);background:var(--surface2)}
+.tab.active{color:var(--brand);background:#fff;border-color:var(--border);position:relative}
+.tab.active::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:1px;background:#fff}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.stat-card{background:var(--surface2);border-radius:10px;padding:16px;transition:all .2s}
+.stat-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.08)}
+.stat-label{font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:500;text-transform:uppercase;letter-spacing:0.5px}
+.stat-value{font-size:28px;font-weight:600;font-family:var(--mono)}
+.c-blue{color:var(--brand)}.c-green{color:var(--success)}.c-amber{color:var(--warn)}.c-red{color:var(--danger)}.c-purple{color:var(--admin)}
+.ticket-list{display:flex;flex-direction:column;gap:8px}
+.ticket-item{background:#fff;border:1px solid var(--border);border-radius:8px;padding:14px 18px;transition:all .15s;display:grid;grid-template-columns:80px 1fr auto auto auto;align-items:center;gap:12px}
+.ticket-item:hover{border-color:var(--brand);background:var(--brand-light)}
+.ticket-id{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap}
+.ticket-title{font-size:14px;font-weight:500;margin-bottom:2px}
+.ticket-meta{font-size:12px;color:var(--muted)}
+.badge{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;white-space:nowrap}
+.badge-open{background:var(--info-bg);color:var(--info)}
+.badge-progress{background:var(--warn-bg);color:var(--warn)}
+.badge-closed{background:var(--success-bg);color:var(--success)}
+.badge-high{background:var(--danger-bg);color:var(--danger)}
+.badge-medium{background:var(--warn-bg);color:var(--warn)}
+.badge-low{background:var(--success-bg);color:var(--success)}
+.badge-critical{background:#1a0505;color:#ff6b6b}
+.badge-admin{background:var(--admin-bg);color:var(--admin)}
+.form-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:28px;max-width:700px;margin:0 auto}
+.form-header{margin-bottom:24px}
+.form-header h2{font-size:20px;font-weight:600;margin-bottom:4px}
+.form-header p{font-size:13px;color:var(--muted)}
+.form-row{margin-bottom:18px}
+.form-row label{display:block;font-size:13px;font-weight:500;margin-bottom:6px}
+.form-row input,.form-row select,.form-row textarea{width:100%;padding:10px 14px;border:1px solid #d1d5db;border-radius:8px;background:#fff;color:var(--text);font-family:var(--font);font-size:14px;outline:none;transition:border-color .15s}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(26,86,219,.1)}
+.form-row textarea{min-height:110px;resize:vertical}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.btn-submit{background:var(--brand);color:white;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:500;font-family:var(--font);cursor:pointer;width:100%;transition:background .15s;margin-top:8px}
+.btn-submit:hover{background:var(--brand-dark)}
+.detail-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px}
+.detail-title{font-size:20px;font-weight:600;margin-bottom:8px}
+.detail-badges{display:flex;gap:8px;flex-wrap:wrap}
+.detail-grid{display:grid;grid-template-columns:1fr 300px;gap:20px}
+.detail-section{background:#fff;border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:16px}
+.detail-section h3{font-size:10px;font-weight:700;color:var(--muted);margin-bottom:14px;text-transform:uppercase;letter-spacing:1px}
+.detail-desc{font-size:14px;line-height:1.7}
+.info-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.info-row:last-child{border-bottom:none}
+.info-label{color:var(--muted)}.info-val{font-weight:500}
+.activity-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.activity-item:last-child{border-bottom:none}
+.activity-avatar{width:30px;height:30px;border-radius:50%;background:var(--brand-light);color:var(--brand);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.activity-text{font-size:13px;line-height:1.5}
+.activity-time{font-size:11px;color:var(--muted)}
+.login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#e8f0fe 0%,#f1f5f9 50%,#e1f5ee 100%)}
+.login-card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:44px;width:100%;max-width:440px;box-shadow:0 8px 40px rgba(26,86,219,0.12)}
+.login-brand{text-align:center;margin-bottom:32px}
+.login-logo-img{height:90px;width:auto;object-fit:contain;display:block;margin:0 auto 14px}
+.login-brand h1{font-family:var(--mono);font-size:24px;font-weight:700}
+.login-brand h1 span{color:var(--brand)}
+.login-brand p{font-size:13px;color:var(--muted);margin-top:6px}
+.login-btn{background:var(--brand);color:white;border:none;width:100%;padding:13px;border-radius:8px;font-size:15px;font-weight:500;font-family:var(--font);cursor:pointer;transition:background .15s;margin-top:4px}
+.login-btn:hover{background:var(--brand-dark)}
+.login-error{background:var(--danger-bg);color:var(--danger);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;display:none}
+.lock-msg{background:#1f2937;color:#f87171;padding:12px 16px;border-radius:8px;font-size:13px;font-weight:500;margin-bottom:16px;display:none;text-align:center}
+.lock-msg.visible{display:block}
+.chpass-notice{background:#fef3c7;color:#92400e;padding:14px 16px;border-radius:8px;font-size:13px;font-weight:500;margin-bottom:20px;text-align:center;border:1px solid #fcd34d}
+.chpass-notice strong{display:block;font-size:15px;margin-bottom:4px}
+.pwd-strength-bar{height:5px;background:var(--surface2);border-radius:4px;margin:-6px 0 16px;overflow:hidden}
+#pwd-strength-fill{height:100%;border-radius:4px;width:0%;transition:width .3s,background .3s}
+.pwd-strength-label{font-size:11px;color:var(--muted);margin-top:-12px;margin-bottom:14px;text-align:right}
+
+/* ========== MEJORAS EN LA TABLA DE USUARIOS ========== */
+.table-wrap {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  background: #fff;
+}
+th {
+  text-align: left;
+  padding: 12px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid var(--border);
+  background: #f8fafc;
+}
+td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #edf2f7;
+  vertical-align: middle;
+}
+tr:last-child td {
+  border-bottom: none;
+}
+tr:hover td {
+  background: var(--brand-light);
+}
+/* Filas alternadas para mejor legibilidad */
+tbody tr:nth-child(even) td {
+  background-color: #fafcff;
+}
+tbody tr:nth-child(even):hover td {
+  background: var(--brand-light);
+}
+
+.action-btns {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.btn-sm {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: #fff;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: all .15s;
+}
+.btn-sm:hover {
+  background: var(--surface2);
+}
+.btn-sm.del {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.btn-sm.del:hover {
+  background: var(--danger-bg);
+}
+.btn-sm.edit {
+  border-color: var(--brand);
+  color: var(--brand);
+}
+.btn-sm.edit:hover {
+  background: var(--brand-light);
+}
+/* Fin mejoras tabla usuarios */
+
+.tk-del-btn{background:none;border:none;cursor:pointer;color:var(--danger);font-size:15px;padding:3px 6px;border-radius:6px;transition:background .15s;line-height:1}
+.tk-del-btn:hover{background:var(--danger-bg)}
+.perm-box{background:var(--surface2);border-radius:8px;padding:14px;margin-top:4px}
+.perm-box .perm-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px}
+.perm-item{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13px;cursor:pointer;user-select:none}
+.perm-item input[type=checkbox]{width:15px;height:15px;accent-color:var(--brand);cursor:pointer}
+#perm-section{display:none}
+.report-filters{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;padding:20px;background:var(--surface2);border-radius:10px;margin-bottom:24px}
+.rf-group{display:flex;flex-direction:column;gap:6px}
+.rf-group label{font-size:12px;font-weight:500;color:var(--muted)}
+.rf-group input,.rf-group select{padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;font-family:var(--font);background:#fff;min-width:140px}
+.report-section{margin-bottom:28px}
+.report-section h3{font-size:15px;font-weight:600;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--brand-light);color:var(--brand)}
+.chart-bar-wrap{display:flex;flex-direction:column;gap:8px}
+.chart-bar-row{display:flex;align-items:center;gap:12px;font-size:13px}
+.chart-bar-label{min-width:130px;text-align:right;color:var(--muted);font-size:12px}
+.chart-bar-bg{flex:1;height:28px;background:var(--surface2);border-radius:6px;overflow:hidden;position:relative}
+.chart-bar-fill{height:100%;border-radius:6px;transition:width .6s ease;display:flex;align-items:center;padding-left:8px;color:white;font-size:12px;font-weight:600}
+.chart-bar-count{min-width:32px;font-weight:700;font-family:var(--mono);font-size:13px}
+.report-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.summary-card{background:var(--surface2);border-radius:8px;padding:14px 18px;text-align:center}
+.summary-card .val{font-size:28px;font-weight:700;font-family:var(--mono)}
+.summary-card .lbl{font-size:11px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:0.5px}
+.btn-export{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;background:var(--success);color:white;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font);transition:background .15s}
+.btn-export:hover{background:#158060}
+.btn-export-pdf{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;background:var(--danger);color:white;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font);transition:background .15s}
+.btn-export-pdf:hover{background:#8b1a1a}
+.export-btns{display:flex;gap:8px;align-items:center}
+.toast{position:fixed;bottom:24px;right:24px;background:#1f2937;color:white;padding:12px 22px;border-radius:8px;font-size:13px;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;z-index:9999;font-family:var(--font);max-width:340px}
+.toast.show{opacity:1;transform:translateY(0)}
+.notif-container{position:fixed;top:20px;right:20px;z-index:10000;display:flex;flex-direction:column;gap:10px;pointer-events:none;max-width:380px}
+.notif-popup{background:#fff;border-radius:14px;padding:0;box-shadow:0 8px 40px rgba(0,0,0,0.18),0 0 0 1px rgba(26,86,219,0.12);pointer-events:all;animation:notifSlide .4s cubic-bezier(.22,.68,0,1.2) forwards;overflow:hidden;border-left:5px solid var(--brand)}
+.notif-popup.notif-alta{border-left-color:var(--danger)}
+.notif-popup.notif-media{border-left-color:var(--warn)}
+.notif-popup.notif-baja{border-left-color:var(--success)}
+.notif-popup.notif-hiding{animation:notifHide .3s ease forwards}
+@keyframes notifSlide{from{opacity:0;transform:translateX(120px) scale(.92)}to{opacity:1;transform:translateX(0) scale(1)}}
+@keyframes notifHide{from{opacity:1;transform:translateX(0) scale(1)}to{opacity:0;transform:translateX(120px) scale(.92)}}
+.notif-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 8px;gap:10px}
+.notif-icon{width:36px;height:36px;border-radius:10px;background:var(--brand-light);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.notif-icon svg{width:20px;height:20px;fill:var(--brand)}
+.notif-icon.alta{background:var(--danger-bg)}.notif-icon.alta svg{fill:var(--danger)}
+.notif-icon.media{background:var(--warn-bg)}.notif-icon.media svg{fill:var(--warn)}
+.notif-icon.baja{background:var(--success-bg)}.notif-icon.baja svg{fill:var(--success)}
+.notif-meta{flex:1;min-width:0}
+.notif-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px}
+.notif-title{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.notif-close{background:none;border:none;cursor:pointer;color:var(--muted);font-size:18px;line-height:1;padding:2px 4px;border-radius:5px;flex-shrink:0}
+.notif-close:hover{background:var(--surface2);color:var(--text)}
+.notif-body{padding:0 14px 12px;font-size:12px;color:var(--muted);line-height:1.5}
+.notif-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.notif-chip{background:var(--surface2);padding:2px 8px;border-radius:12px;font-size:10px;font-weight:600;color:var(--muted)}
+.notif-chip.high{background:var(--danger-bg);color:var(--danger)}
+.notif-chip.med{background:var(--warn-bg);color:var(--warn)}
+.notif-chip.low{background:var(--success-bg);color:var(--success)}
+.notif-user{font-size:11px;color:var(--muted);margin-top:2px}
+.notif-actions{display:flex;gap:6px;padding:0 14px 12px}
+.notif-btn-ver{background:var(--brand);color:#fff;border:none;padding:5px 14px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);transition:background .15s}
+.notif-btn-ver:hover{background:var(--brand-dark)}
+.notif-btn-dis{background:none;border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:7px;font-size:12px;cursor:pointer;font-family:var(--font);transition:all .15s}
+.notif-btn-dis:hover{background:var(--surface2)}
+.notif-progress{height:3px;background:var(--surface2);overflow:hidden}
+.notif-progress-bar{height:100%;background:var(--brand);animation:notifProgress 8s linear forwards}
+.notif-popup.notif-alta .notif-progress-bar{background:var(--danger)}
+.notif-popup.notif-media .notif-progress-bar{background:var(--warn)}
+.notif-popup.notif-baja .notif-progress-bar{background:var(--success)}
+@keyframes notifProgress{from{width:100%}to{width:0%}}
+.filter-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.filter-btn{font-size:12px;padding:5px 14px;border-radius:20px;border:1px solid var(--border);cursor:pointer;background:#fff;color:var(--muted);font-family:var(--font);transition:all .15s}
+.filter-btn:hover,.filter-btn.active{background:var(--brand);color:white;border-color:var(--brand)}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.section-header h2{font-size:18px;font-weight:600}
+.empty{text-align:center;padding:56px 20px;color:var(--muted);font-size:14px}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-box{background:#fff;border-radius:14px;padding:32px;width:100%;max-width:460px;box-shadow:0 20px 60px rgba(0,0,0,0.2)}
+.modal-box h3{font-size:18px;font-weight:600;margin-bottom:20px}
+.modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end}
+@media(max-width:760px){
+  .app-layout{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  .detail-grid{grid-template-columns:1fr}
+  .form-grid{grid-template-columns:1fr}
+  .ticket-item{grid-template-columns:60px 1fr}
+  .ticket-item .badge:last-child{display:none}
+}
+</style>
+</head>
+<body>
+<div id="app">
+<div id="toast" class="toast"></div>
+<div id="notif-container" class="notif-container"></div>
+<div id="modal-user" class="modal-overlay">
+  <div class="modal-box">
+    <h3 id="modal-title">Crear usuario</h3>
+    <div class="form-row"><label>Nombre completo *</label><input type="text" id="mu-name" placeholder="Juan Perez" maxlength="80"/></div>
+    <div class="form-row"><label>Correo electronico *</label><input type="email" id="mu-email" placeholder="correo@empresa.com" maxlength="120"/></div>
+    <div class="form-row"><label>Password *</label><input type="password" id="mu-pass" placeholder="8+ chars, mayúscula, número, símbolo" autocomplete="new-password" spellcheck="false" maxlength="128"/></div>
+    <div class="form-row"><label>Rol *</label>
+      <select id="mu-rol" onchange="togglePermisos()">
+        <option value="usuario">Usuario</option>
+        <option value="tecnico">Tecnico</option>
+        <option value="admin">Administrador</option>
+      </select>
+    </div>
+    <div class="form-row"><label>Departamento</label><input type="text" id="mu-dept" placeholder="Ej: Contabilidad" maxlength="60"/></div>
+    <div class="form-row" id="perm-section">
+      <div class="perm-box">
+        <div class="perm-title">Permisos del tecnico</div>
+        <label class="perm-item"><input type="checkbox" id="perm-del" checked/> Puede eliminar tickets</label>
+        <label class="perm-item"><input type="checkbox" id="perm-sts" checked/> Puede cambiar estado de tickets</label>
+        <label class="perm-item"><input type="checkbox" id="perm-asg" checked/> Puede asignarse tickets</label>
+        <label class="perm-item"><input type="checkbox" id="perm-pri"/> Puede cambiar prioridad de tickets</label>
+        <label class="perm-item"><input type="checkbox" id="perm-rep" checked/> Puede ver reportes</label>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-nav" onclick="closeModal()">Cancelar</button>
+      <button class="btn-nav btn-primary" onclick="saveUser()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN SCREEN -->
+<div class="screen active" id="screen-login">
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-brand">
+        <img class="login-logo-img" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%231a56db'/%3E%3Ctext x='100' y='140' font-size='90' text-anchor='middle' fill='white' font-family='monospace' font-weight='bold'%3EFS%3C/text%3E%3Ctext x='100' y='175' font-size='28' text-anchor='middle' fill='%23e8f0fe'%3EAT%3C/text%3E%3C/svg%3E" alt="FSAT Systems">
+        <h1>FSAT<span>Desk</span></h1>
+        <p>Sistema de Tickets de Soporte Tecnico</p>
+      </div>
+      <div id="login-error" class="login-error"></div>
+      <div id="login-lock-msg" class="lock-msg"></div>
+      <div class="form-row"><label>Correo electronico</label><input type="email" id="login-email" placeholder="correo@empresa.com" value="Administrator" autocomplete="username" maxlength="120" spellcheck="false"/></div>
+      <div class="form-row"><label>Password</label><input type="password" id="login-pass" placeholder="Password" autocomplete="current-password" spellcheck="false" maxlength="128" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+      <button class="login-btn" onclick="doLogin()">Iniciar sesion</button>
+      <p style="text-align:center;margin-top:16px;font-size:12px;color:var(--muted)">Contacta al administrador si no tienes acceso</p>
+    </div>
+  </div>
+</div>
+
+<!-- CAMBIO DE CONTRASEÑA FORZADO -->
+<div class="screen" id="screen-chpass">
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-brand">
+        <img class="login-logo-img" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%231a56db'/%3E%3Ctext x='100' y='140' font-size='90' text-anchor='middle' fill='white' font-family='monospace' font-weight='bold'%3EFS%3C/text%3E%3Ctext x='100' y='175' font-size='28' text-anchor='middle' fill='%23e8f0fe'%3EAT%3C/text%3E%3C/svg%3E" style="display:block">
+        <h1>FSAT<span>Desk</span></h1>
+        <p>Seguridad de cuenta</p>
+      </div>
+      <div class="chpass-notice">
+        <strong>⚠️ Contraseña expirada</strong>
+        Tu contraseña tiene más de 90 días. Debes cambiarla para continuar.
+      </div>
+      <div id="chpass-error" class="login-error"></div>
+      <div class="form-row">
+        <label>Contraseña actual</label>
+        <input type="password" id="chpass-current" placeholder="Tu contraseña actual" onkeydown="if(event.key==='Enter')doChangePass()" autocomplete="new-password" spellcheck="false" maxlength="128"/>
+      </div>
+      <div class="form-row">
+        <label>Nueva contraseña</label>
+        <input type="password" id="chpass-new" placeholder="8+ chars, mayúscula, número, símbolo" oninput="evalPassStrength()" onkeydown="if(event.key==='Enter')doChangePass()" autocomplete="new-password" spellcheck="false" maxlength="128"/>
+      </div>
+      <div class="pwd-strength-bar"><div id="pwd-strength-fill"></div></div>
+      <div class="pwd-strength-label" id="pwd-strength-label"></div>
+      <div class="form-row">
+        <label>Confirmar nueva contraseña</label>
+        <input type="password" id="chpass-confirm" placeholder="Repite la nueva contraseña" onkeydown="if(event.key==='Enter')doChangePass()" autocomplete="new-password" spellcheck="false" maxlength="128"/>
+      </div>
+      <button class="login-btn" onclick="doChangePass()">Guardar nueva contraseña</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="screen" id="screen-main">
+  <nav>
+    <div class="nav-brand">
+      <div class="nav-logo-box"><img class="nav-logo-img" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%231a56db'/%3E%3Ctext x='100' y='140' font-size='90' text-anchor='middle' fill='white' font-family='monospace' font-weight='bold'%3EFS%3C/text%3E%3Ctext x='100' y='175' font-size='28' text-anchor='middle' fill='%23e8f0fe'%3EAT%3C/text%3E%3C/svg%3E" alt="FSAT Systems"></div>
+      <span class="nav-title">FSAT<span>Desk</span></span>
+    </div>
+    <div class="nav-right">
+      <div id="refresh-indicator" class="refresh-indicator" title="Auto-refresh activo">
+        <div class="refresh-ring">
+          <svg viewBox="0 0 16 16">
+            <circle cx="8" cy="8" r="6"/>
+            <circle class="arc" id="refresh-arc" cx="8" cy="8" r="6"/>
+          </svg>
+        </div>
+        <span id="refresh-label">30s</span>
+      </div>
+      <span class="nav-user" id="nav-user-name"></span>
+      <span class="nav-role" id="nav-role-badge"></span>
+      <button class="btn-nav" onclick="logout()">Salir</button>
+    </div>
+  </nav>
+  <div class="app-layout">
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-logo"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%231a56db'/%3E%3Ctext x='100' y='140' font-size='90' text-anchor='middle' fill='white' font-family='monospace' font-weight='bold'%3EFS%3C/text%3E%3Ctext x='100' y='175' font-size='28' text-anchor='middle' fill='%23e8f0fe'%3EAT%3C/text%3E%3C/svg%3E" alt="FSAT Systems"></div>
+      <div class="sidebar-sections">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Principal</div>
+        <div class="sidebar-item active" onclick="navTo('dash',this)" id="nav-dash">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+          Dashboard
+        </div>
+        <div class="sidebar-item" onclick="navTo('tickets',this)" id="nav-tickets">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+          Tickets
+        </div>
+        <div class="sidebar-item" id="nav-nuevo-ticket" onclick="navTo('nuevo-ticket',this)">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+          Nuevo Ticket
+        </div>
+      </div>
+      <div class="sidebar-section" id="sidebar-admin-section" style="display:none">
+        <div class="sidebar-label">Administracion</div>
+        <div class="sidebar-item" onclick="navTo('usuarios',this)" id="nav-usuarios">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+          Usuarios
+        </div>
+        <div class="sidebar-item" onclick="navTo('reportes',this)" id="nav-reportes">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l7.59-7.59L21 8l-9 9z"/></svg>
+          Reportes
+        </div>
+        <div style="margin:12px 8px 0;padding:10px;background:#fee2e2;border-radius:8px;font-size:11px;color:#991b1b">
+          <div id="db-info" style="margin-bottom:6px;font-weight:500">Base de datos local</div>
+          <button onclick="dbReset()" style="font-size:10px;padding:3px 8px;border:1px solid #f87171;background:#fff;color:#dc2626;border-radius:5px;cursor:pointer;font-family:var(--font);width:100%">&#9888; Restablecer BD</button>
+        </div>
+      </div>
+      <div class="sidebar-section" id="sidebar-tecnico-section" style="display:none">
+        <div class="sidebar-label">Tecnico</div>
+        <div class="sidebar-item" onclick="navTo('reportes',this)" id="nav-reportes-tec" style="display:none">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l7.59-7.59L21 8l-9 9z"/></svg>
+          Reportes
+        </div>
+      </div>
+    </div></div>
+    <div class="main-content" id="main-content">
+      <!-- contenido dinamico -->
+    </div>
+  </div>
+</div>
+</div>
+
+<script src="/script.js"></script>
+</body>
+</html>
